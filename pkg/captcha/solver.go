@@ -2,14 +2,21 @@ package captcha
 
 import (
 	"fmt"
-
 	"os"
 
 	capsolver_go "github.com/capsolver/capsolver-go"
 )
 
-var capSolver = capsolver_go.CapSolver{
-	ApiKey: os.Getenv("CAPSOLVER_API_KEY"),
+type Solver struct {
+	capSolver *capsolver_go.CapSolver
+}
+
+func Init() *Solver {
+	return &Solver{
+		capSolver: &capsolver_go.CapSolver{
+			ApiKey: os.Getenv("CAPSOLVER_API_KEY"),
+		},
+	}
 }
 
 type CaptchaSolution struct {
@@ -24,7 +31,15 @@ type CaptchaAction struct {
 	Anchor string
 }
 
-func Solve(action CaptchaAction, cookie string) (*CaptchaSolution, error) {
+func (s *Solver) Balance() string {
+	capRes, err := s.capSolver.Balance()
+	if err != nil {
+		return "0.00" // Return 0.00 if there's an error fetching the balance
+	}
+	return fmt.Sprintf("%.2f", capRes.Balance)
+}
+
+func (s *Solver) Solve(action CaptchaAction, cookie string) (*CaptchaSolution, error) {
 
 	task := map[string]any{
 		"type":       "ReCaptchaV3EnterpriseTaskProxyless",
@@ -39,7 +54,7 @@ func Solve(action CaptchaAction, cookie string) (*CaptchaSolution, error) {
 		task["cookie"] = cookie
 	}
 
-	res, err := capSolver.Solve(task)
+	res, err := s.capSolver.Solve(task)
 	if err != nil {
 		return nil, fmt.Errorf("failed to solve captcha: %w", err)
 	}

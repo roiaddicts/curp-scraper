@@ -11,7 +11,9 @@ import (
 
 func Fetch(curp string) (*CurpModel, error) {
 
-	consulta, err := captcha.Solve(captcha.Consulta, "")
+	solver := captcha.Init() // Initialize the captcha solver
+
+	consulta, err := solver.Solve(captcha.Consulta, "")
 	if err != nil {
 		return nil, &Error{Code: "CAPTCHA_FAILURE", Message: fmt.Sprintf("failed to get captcha solution: %v", err)}
 	}

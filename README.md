@@ -44,18 +44,18 @@ CURP Scraper is a lightweight Go API server for extracting and validating CURP (
 
 ## API Endpoints
 
-### `GET /curp`
+### `GET /curp/{curp}`
 
 Fetch CURP information.
 
-**Query Parameters:**
+**Path Parameters:**
 
 - `curp` (required): The CURP string to look up.
 
 **Example:**
 
 ```
-GET http://localhost:8080/curp?curp=YOUR_CURP_HERE
+GET http://localhost:8080/curp/YOUR_CURP_HERE
 ```
 
 **Response:**
@@ -91,7 +91,8 @@ GET http://localhost:8080/health
 
 ```json
 {
-  "status": "ok"
+  "status": "healthy",
+  "balance": "0.00"
 }
 ```
 

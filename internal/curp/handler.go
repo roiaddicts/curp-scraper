@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		curp := r.URL.Query().Get("curp")
+		curp := strings.TrimPrefix(r.URL.Path, "/")
 		if len(curp) != 18 {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(api.Response{
@@ -22,13 +23,20 @@ func Handler() http.Handler {
 		}
 
 		if cachedRes, ok := GetFromCache(curp); ok {
-			log.Printf("Returning cached data for CURP: %s", curp)
-			if cachedRes.Data != nil {
+			found := cachedRes.Data != nil
+			log.Printf("Returning cached data for CURP: %s, Exists: %t", curp, found)
+			if found {
 				w.WriteHeader(http.StatusOK)
+				json.NewEncoder(w).Encode(cachedRes)
 			} else {
 				w.WriteHeader(http.StatusNotFound)
+				json.NewEncoder(w).Encode(api.Response{
+					Error: &api.Error{
+						Code:    "CURP_NOT_FOUND",
+						Message: "CURP found in cache, but no data available",
+					},
+				})
 			}
-			json.NewEncoder(w).Encode(cachedRes)
 			return
 		}
 

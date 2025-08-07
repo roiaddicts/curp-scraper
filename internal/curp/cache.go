@@ -29,11 +29,13 @@ func cache(filename string, data any) {
 func fromCache[T any](filename string) (T, bool) {
 	var zero T
 
-	if _, err := os.Stat(filename); err != nil {
+	filepath := "cache/" + filename
+
+	if _, err := os.Stat(filepath); err != nil {
 		return zero, false
 	}
 
-	file, err := os.Open(filename)
+	file, err := os.Open(filepath)
 	if err != nil {
 		return zero, false
 	}
