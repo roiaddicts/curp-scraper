@@ -15,7 +15,7 @@ func Handler() http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(api.Response{
 				Error: &api.Error{
-					Code:    "INVALID_CURP",
+					Code:    ErrInvalidCurp,
 					Message: "CURP must be 18 characters long",
 				},
 			})
@@ -32,7 +32,7 @@ func Handler() http.Handler {
 				w.WriteHeader(http.StatusNotFound)
 				json.NewEncoder(w).Encode(api.Response{
 					Error: &api.Error{
-						Code:    "CURP_NOT_FOUND",
+						Code:    ErrCurpNotFound,
 						Message: "CURP found in cache, but no data available",
 					},
 				})
@@ -44,7 +44,7 @@ func Handler() http.Handler {
 		res := api.Response{}
 		if err != nil {
 			code := http.StatusInternalServerError
-			if e, ok := err.(*Error); ok && e.Code == "CURP_NOT_FOUND" {
+			if e, ok := err.(*Error); ok && e.Code == ErrCurpNotFound {
 				code = http.StatusNotFound
 			}
 			w.WriteHeader(code)

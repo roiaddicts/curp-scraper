@@ -55,12 +55,22 @@ Fetch CURP information.
 **Example:**
 
 ```
-GET http://localhost:8080/curp/YOUR_CURP_HERE
+GET /curp/YOUR_CURP_HERE HTTP/1.1
+Host: localhost:8080
+```
+
+**Curl example (success):**
+
+```sh
+curl -i http://localhost:8080/curp/YOUR_CURP_HERE
 ```
 
 **Successful Response:**
 
-```json
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+
 {
   "data": {
     "curp": "RODR850715MDFLRS09",
@@ -79,9 +89,18 @@ GET http://localhost:8080/curp/YOUR_CURP_HERE
 }
 ```
 
+**Curl example (error):**
+
+```sh
+curl -i http://localhost:8080/curp/INVALIDCURP1234567
+```
+
 **Error Response:**
 
-```json
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
 {
   "error": {
     "code": "CURP_NOT_FOUND",
@@ -90,6 +109,19 @@ GET http://localhost:8080/curp/YOUR_CURP_HERE
 }
 ```
 
+The `error.code` field in the response can have one of the following values:
+
+| Code                   | HTTP Status Code          | Description                                                                                          |
+| ---------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| CAPTCHA_FAILURE        | 500 Internal Server Error | Failed to solve or validate the CAPTCHA.                                                             |
+| ENCODING_ERROR         | 500 Internal Server Error | Failed to encode request data.                                                                       |
+| REQUEST_CREATION_ERROR | 500 Internal Server Error | Failed to create the HTTP request.                                                                   |
+| RENAPO_HTTP_ERROR      | 500 Internal Server Error | Error response from RENAPO service.                                                                  |
+| RENAPO_RATE_LIMITED    | 429 Too Many Requests     | Rate limited by RENAPO. Please try again later. Look for `Retry-After` header to know when to retry. |
+| DECODE_ERROR           | 500 Internal Server Error | Failed to decode the response from RENAPO.                                                           |
+| CURP_NOT_FOUND         | 404 Not Found             | No records found for the provided CURP.                                                              |
+| INVALID_CURP           | 400 Bad Request           | The provided CURP is not 18 characters long and/or does not match required format rules.             |
+
 ### `GET /health`
 
 Health check endpoint.
@@ -97,7 +129,8 @@ Health check endpoint.
 **Example:**
 
 ```
-GET http://localhost:8080/health
+GET /health HTTP/1.1
+Host: localhost:8080
 ```
 
 **Response:**
@@ -108,6 +141,10 @@ GET http://localhost:8080/health
   "balance": "0.00"
 }
 ```
+
+## Note
+
+This is API version 1 (v1) and is subject to change.
 
 ## License
 

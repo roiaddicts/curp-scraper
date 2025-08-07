@@ -15,7 +15,7 @@ func Fetch(curp string) (*CurpModel, error) {
 
 	consulta, err := solver.Solve(captcha.Consulta, "")
 	if err != nil {
-		return nil, &Error{Code: "CAPTCHA_FAILURE", Message: fmt.Sprintf("failed to get captcha solution: %v", err)}
+		return nil, &Error{Code: ErrCaptchaFailure, Message: fmt.Sprintf("failed to get captcha solution: %v", err)}
 	}
 
 	reqBody := map[string]string{
@@ -27,12 +27,12 @@ func Fetch(curp string) (*CurpModel, error) {
 
 	bodyBytes, err := json.Marshal(reqBody)
 	if err != nil {
-		return nil, &Error{Code: "ENCODING_ERROR", Message: err.Error()}
+		return nil, &Error{Code: ErrEncodingError, Message: err.Error()}
 	}
 
 	req, err := http.NewRequest(http.MethodPost, "https://www.gob.mx/v1/renapoCURP/consulta", bytes.NewBuffer(bodyBytes))
 	if err != nil {
-		return nil, &Error{Code: "REQUEST_CREATION_ERROR", Message: fmt.Sprintf("failed to create request: %v", err)}
+		return nil, &Error{Code: ErrRequestCreation, Message: fmt.Sprintf("failed to create request: %v", err)}
 	}
 
 	// Use Header map directly for non-canonical keys
@@ -71,20 +71,24 @@ func Fetch(curp string) (*CurpModel, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusTeapot {
+		// RENAPO returns 418 when rate limited
+		return nil, &Error{Code: ErrRenapoRateLimited, Message: "Rate limited by RENAPO. Please try again later."}
+	}
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, &Error{Code: "RENAPO_HTTP_ERROR", Message: fmt.Sprintf("request failed with status %d: %s", resp.StatusCode, body)}
+		return nil, &Error{Code: ErrRenapoHTTPError, Message: fmt.Sprintf("request failed with status %d: %s", resp.StatusCode, body)}
 	}
 
 	// Process the response body as needed
 
 	var res curpResponse
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return nil, &Error{Code: "DECODE_ERROR", Message: err.Error()}
+		return nil, &Error{Code: ErrDecodeError, Message: err.Error()}
 	}
 
 	if res.Codigo == "180001" || len(res.Registros) == 0 {
-		return nil, &Error{Code: "CURP_NOT_FOUND", Message: "No records found"}
+		return nil, &Error{Code: ErrCurpNotFound, Message: "No records found"}
 	}
 
 	r := res.Registros[0]
