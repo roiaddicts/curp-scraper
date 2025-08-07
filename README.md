@@ -79,10 +79,6 @@ GET http://localhost:8080/curp/YOUR_CURP_HERE
 }
 ```
 
-}
-
-````
-
 **Error Response:**
 
 ```json
@@ -92,7 +88,7 @@ GET http://localhost:8080/curp/YOUR_CURP_HERE
     "message": "CURP found in cache, but no data available"
   }
 }
-````
+```
 
 ### `GET /health`
 
