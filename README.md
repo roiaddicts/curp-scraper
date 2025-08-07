@@ -58,24 +58,41 @@ Fetch CURP information.
 GET http://localhost:8080/curp/YOUR_CURP_HERE
 ```
 
-**Response:**
+**Successful Response:**
 
 ```json
 {
-  "curp": "YOUR_CURP_HERE",
-  "nombres": "Juan",
-  "primerApellido": "Perez",
-  "segundoApellido": "Lopez",
-  "claveGenero": "H",
-  "genero": "H",
-  "fechaNacimiento": "01/01/1990",
-  "diaNacimiento": "01",
-  "mesNacimiento": "01",
-  "anioNacimiento": "1990",
-  "claveEntidadNacimiento": "DF",
-  "entidadNacimiento": "CIUDAD DE MEXICO"
+  "data": {
+    "curp": "RODR850715MDFLRS09",
+    "nombres": "JUANA MARIA",
+    "primerApellido": "RODRIGUEZ",
+    "segundoApellido": "LOPEZ",
+    "claveGenero": "MUJER",
+    "genero": "MUJER",
+    "fechaNacimiento": "15/07/1985",
+    "diaNacimiento": "15",
+    "mesNacimiento": "07",
+    "anioNacimiento": "1985",
+    "claveEntidadNacimiento": "DF",
+    "entidadNacimiento": "DISTRITO FEDERAL"
+  }
 }
 ```
+
+}
+
+````
+
+**Error Response:**
+
+```json
+{
+  "error": {
+    "code": "CURP_NOT_FOUND",
+    "message": "CURP found in cache, but no data available"
+  }
+}
+````
 
 ### `GET /health`
 
